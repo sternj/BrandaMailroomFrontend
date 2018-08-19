@@ -3,11 +3,44 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
+<div class="jumbotron">
+    <h2>Current appointments</h2>
+</div>
+<div id="current">
+</div>
+<div class="jumbotron">
+    <h2>Future appointments</h2>
+</div>
+<div id="future">
+
+</div>
 <script>
+    data = [
+    {
+        "id": "first person",
+        "time": "19 Aug 2018 13:30:00 EDT"
+    },
+    {
+        "id": "second person",
+        "time": "19 Aug 2018 13:30:00 EDT"
+    },
+    {
+        "id": "third person",
+        "time": "19 Aug 2018 13:30:00 EDT"
+    },
+    {
+        "id": "fourth person",
+        "time": "19 Aug 2018 13:45:00 EDT"
+    },
+    {
+        "id": "fifth person",
+        "time": "19 Aug 2018 13:45:00 EDT"
+    }
+]
     function roundTimeQuarterHour(time) {
         var timeToReturn = new Date(time);
     
-        timeToReturn.setMilliseconds(Math.round(time.getMilliseconds() / 1000) * 1000);
+        timeToReturn.setMilliseconds(Math.round(timeToReturn.getMilliseconds() / 1000) * 1000);
         timeToReturn.setSeconds(Math.round(timeToReturn.getSeconds() / 60) * 60);
         timeToReturn.setMinutes(Math.round(timeToReturn.getMinutes() / 15) * 15);
         return timeToReturn;
@@ -18,14 +51,40 @@
     let subMinutes = (date, minutes) => {
         return new Date(date.getTime() - minutes*60000);
     }
-    let appts = require('/assets/data.json').map((x) => {
-        return {
-            id: x.id,
-            time: new Date(x.time),
-        }
-    });
-    let currentAppts = appts.filter((x) => roundTimeQuarterHour(Date.now()) >= x.time);
+    let makeCardList = (dates) => {
+        return dates.map((date) => {
+            return `<div class='card'>
+                        <div class='card-body'>
+                            <h4 class='card-title'>
+                                ${date.id}
+                            </h4>
+                            <h5 class='card-subtitle mb-2 text-muted'>
+                                ${date.time.toTimeString()}
+                            </h5>
+                        </div>
+                    </div>`
+        })
+    }
+    
+    //replace this with API call
+    let appts = data
+        .map((x) => {
+            return {
+                id: x.id,
+                time: new Date(x.time),
+            }
+        });
     //Assumption here-- the upstream call will only return proximal appts
-    let futureAppts = appts.filter((x) => roundTimeQuarterHour(Date.now()) < x.time);
+    let currentAppts = appts
+        .filter((x) => roundTimeQuarterHour(Date.now()) >= x.time);
+
+    let futureAppts = appts
+        .filter((x) => roundTimeQuarterHour(Date.now()) < x.time)
+        .sort((a,b) => b.time - a.time);
+    console.log(currentAppts);
+    console.log(futureAppts);
+    document.getElementById("current").innerHTML = makeCardList(currentAppts).join("\n");
+    
+    document.getElementById("future").innerHTML = makeCardList(futureAppts).join("\n");
 
 </script>
